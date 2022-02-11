@@ -1,117 +1,391 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from "vue"
+// Code by simmzl
+import { ref, reactive, computed } from "vue";
 
-const fonts = ref("")
-let errorMsg = ref("")
+const fonts = ref("");
+let errorMsg = ref("");
 const file = reactive({
   name: "",
   size: 0,
-  path: ""
-})
+  path: "",
+});
 
-const isValid = computed(
-  () => !!fonts.value
-);
+const isValid = computed(() => !!fonts.value && !errorMsg.value && file.path);
 
-const fileSize = computed(
-  () => file.size === 0 ? "--" : `${(file.size / 1000000).toFixed(2)}M`
+const fileSize = computed(() =>
+  file.size === 0 ? "--" : `${(file.size / 1000000).toFixed(3)}MB`
 );
 
 const fileHandler = (e: Event) => {
-  const input = e.target as HTMLInputElement
-  if (!input.files || !input.files.length) return
-  console.warn(input.files.length)
-  const { name, path, size } = input.files[0] as any
-  errorMsg.value = ""
-  if (!/.ttf$/.test(name)) return errorMsg.value = "请选择ttf文件"
+  const input = e.target as HTMLInputElement;
+  if (!input.files || !input.files.length) return;
+  console.warn(input.files.length);
+  const { name, path, size } = input.files[0] as any;
+  errorMsg.value = "";
+  if (!/.ttf$/.test(name)) return (errorMsg.value = "*请上传TTF格式文件");
 
-  console.warn(input.files)
-  file.name = name
-  file.path = path
-  file.size = size
-  console.warn(file)
-  upload()
-}
+  console.warn(input.files);
+  file.name = name;
+  file.path = path;
+  file.size = size;
+  console.warn(file);
+  upload();
+};
 
 const output = () => {
-  if (!isValid.value) return
-  window.fontTiny.compress(fonts.value)
-}
+  if (!isValid.value) return;
+  window.fontTiny.compress(fonts.value);
+};
 
 const upload = () => {
-  window.fontTiny.upload(file.path, file.name)
-}
+  window.fontTiny.upload(file.path, file.name);
+};
 </script>
 
 <template>
-  <section class="top">
+  <!-- Code by yy & simmzl -->
+  <div class="top">
+    <img src="./assets/logo.png" class="logo" />
+  </div>
+
+  <div class="content">
     <div class="input">
-      <label for="file" class="btn input-font">选择TTF文件</label>
-      <input type="file" id="file" @change="fileHandler">
+      <div class="upload">
+        <label for="file" class="center bt1 btn">上传字体包</label>
+        <input type="file" id="file" @change="fileHandler" />
+      </div>
+      <div class="fontname">
+        <span class="text1 err" v-if="errorMsg">{{errorMsg}}</span>
+        <span class="text1" v-else-if="!file.path">*仅支持ttf格式</span>
+        <template v-else>
+          <span class="text2">{{ file.name || "--" }}</span>
+          <span class="text3">{{ fileSize }}</span>
+        </template>
+      </div>
     </div>
-
-    <div class="info">
-      <p class="error">{{errorMsg}}</p>
-      <p>已选择文件：{{file.name || "--"}}</p>
-      <p>源文件大小：{{fileSize}}</p>
-    </div>
-  </section>
-
-  <section class="textarea">
-    <textarea cols="30" rows="10" v-model="fonts" placeholder="请输入要保留的文字"></textarea>
-  </section>
-
-  <section class="bottom">
-    <div class="btn output" :class="{ disabled: !isValid }" @click="output">导出</div>
-  </section>
+    <textarea placeholder="请在此粘贴所需字符" class="text5 word" v-model="fonts"></textarea>
+    <div class="center bt2 btn" :class="{ disabled: !isValid }" @click="output">导出</div>
+  </div>
 </template>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-  user-select: none;
+html {
+  height: 100%;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.btn {
+body {
+  height: 100%;
+  margin: 0;
+  font-size: 14px;
+  font-family: "PingFang SC", "Helvetica Neue", Helvetica, STHeiTi, Arial,
+    sans-serif;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+progress {
+  vertical-align: baseline;
+}
+
+template,
+[hidden] {
+  display: none;
+}
+
+a {
+  text-decoration: none;
+  background-color: transparent;
+  -webkit-text-decoration-skip: objects;
+}
+
+a:active,
+a:hover {
+  outline-width: 0;
+}
+
+abbr[title] {
+  text-decoration: underline;
+}
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+dfn {
+  font-style: italic;
+}
+
+small {
+  font-size: 80%;
+}
+
+sub,
+sup {
+  position: relative;
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+img {
+  border-style: none;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-size: 1em;
+  font-family: monospace;
+}
+
+pre {
+  overflow: auto;
+  white-space: pre;
+  word-wrap: break-word;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  margin: 0;
+  outline: none;
+  font: inherit;
+  vertical-align: middle;
+  color: inherit;
+}
+
+button {
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+button,
+input {
+  overflow: visible;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button,
+html [type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+}
+
+[disabled] {
+  cursor: default;
+}
+
+[type="checkbox"],
+[type="radio"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+[type="number"]::-webkit-inner-spin-button,
+[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+[type="search"] {
+  -webkit-appearance: textfield;
+  outline-offset: -2px;
+}
+
+[type="search"]::-webkit-search-cancel-button,
+[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+
+textarea {
+  overflow: auto;
+  resize: none;
+  vertical-align: top;
+}
+
+optgroup {
+  font-weight: bold;
+}
+
+input,
+select,
+textarea {
+  outline: 0;
+}
+
+textarea,
+input {
+  -webkit-user-modify: read-write-plaintext-only;
+}
+
+input,
+select {
+  padding: 0;
+  border: 0 none;
+  -webkit-appearance: none;
+  background-color: transparent;
+}
+
+input::-ms-clear,
+input::-ms-reveal {
+  display: none;
+}
+
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  color: inherit;
+  opacity: 0.54;
+}
+
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder {
+  color: inherit;
+  opacity: 0.54;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td,
+th {
+  padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+form,
+blockquote {
+  margin: 0;
+}
+
+ul,
+ol,
+li,
+dl,
+dd {
+  padding: 0;
+  margin: 0;
+}
+
+ul,
+ol {
+  list-style: none outside none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: normal;
+  font-size: 100%;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+</style>
+
+<style>
+/* Code by yy */
+.top {
+  width: 100%;
+  height: 42px;
+  background-color: #222222;
+  display: flex;
+  align-items: center;
+}
+.logo {
+  width: 62px;
+  height: 19px;
+  margin-left: 16px;
+}
+.center {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 120px;
-  height: 40px;
-  border-radius: 6px;
-  background: #25d4d0;
-  color: #fff;
-  font-size: 12px;
+}
+.btn {
   cursor: pointer;
-  user-select: none;
+  background-color: #27d4d1;
+  transition: all .3s;
 }
-
-.btn:hover {
-  background: #13dad6;
+.btn:active {
+  background: #1ec6c3;
 }
-
-.btn.disabled {
-  background: gray;
-  cursor: not-allowed;
+.content {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  align-items: center;
 }
-
-.output {
-  margin: 20px auto;
-}
-
-.input {
+.upload {
   position: relative;
   width: 120px;
-  height: 40px;
+  height: 38px;
   margin: 0 auto;
 }
-
-.input input {
+.upload input {
   position: absolute;
   left: 0;
   right: 0;
@@ -123,8 +397,7 @@ const upload = () => {
   z-index: 1;
   cursor: pointer;
 }
-
-.input-font {
+.upload .btn {
   position: absolute;
   left: 0;
   top: 0;
@@ -132,47 +405,90 @@ const upload = () => {
   height: 100%;
   font-size: 12px;
   border-radius: 6px;
-  background: #25d4d0;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 2;
   cursor: pointer;
 }
-
-.info {
-  font-size: 12px;
-  text-align: center;
+.bt1 {
+  width: 102px;
+  height: 38px;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
 }
-
-.info p {
-  margin: 6px 0;
+.bt2 {
+  width: 144px;
+  height: 48px;
+  margin: 46px auto 56px auto;
+  border-radius: 24px;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  padding-left: 4px;
 }
-
-section {
-  margin: 20px 0;
+.bt2.disabled {
+  background-color: #d6d6d6;
 }
-
-textarea {
-  width: 400px;
-  height: 200px;
-  padding: 10px 13px 10px 10px;
-  margin: 15px 20px;
-  border: 2px solid #25d4d0;
-  border-radius: 6px;
-  font-size: 12px;
-  line-height: 23px;
+.fontname {
+  width: 256px;
+  height: 38px;
+  border-radius: 8px;
+  margin-left: 8px;
+  padding-left: 14px;
+  padding-right: 14px;
+  font-size: 14px;
+  font-weight: 400;
+  background-color: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.text1 {
+  color: #c4c4c4;
+  letter-spacing: 1px;
+}
+.err {
+  color: #ff904d;
+  letter-spacing: 0;
+}
+.text2 {
   color: #282828;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-textarea::placeholder {
-  font-size: 12px;
-  line-height: 23px;
-  color: #474747;
+.text3 {
+  flex-shrink: 0;
+  color: #b1b1b1;
+  margin-left: 8px;
 }
-
-.error {
-  color: #fe6063;
+.input {
+  width: 366px;
+  height: 38px;
+  margin: 56px auto 46px auto;
+  display: flex;
+}
+.word {
+  width: 366px;
+  height: 50vh;
+  border-radius: 8px;
+  margin: 0px auto;
+  padding: 18px 18px 18px 18px;
+  border-color: #27d4d1;
+  border-width: 1px;
+  background-color: #f5f5f5;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  display: block;
+}
+.text5 {
+  color: #282828;
+  text-align: justify;
+}
+.text5::placeholder {
+  color: #b1b1b1;
 }
 </style>

@@ -22,7 +22,7 @@ const fileHandler = (e: Event) => {
   console.warn(input.files.length);
   const { name, path, size } = input.files[0] as any;
   errorMsg.value = "";
-  if (!/.ttf$/.test(name)) return (errorMsg.value = "*请上传TTF格式文件");
+  if (!/\.ttf$/.test(name.toLowerCase())) return (errorMsg.value = "*请上传TTF格式文件");
 
   console.warn(input.files);
   file.name = name;

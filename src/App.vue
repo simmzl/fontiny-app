@@ -52,7 +52,7 @@ const upload = () => {
     <div class="input">
       <div class="upload">
         <label for="file" class="center bt1 btn">上传字体包</label>
-        <input type="file" id="file" @change="fileHandler" />
+        <input type="file" id="file" @change="fileHandler" accept=".ttf" />
       </div>
       <div class="fontname">
         <span class="text1 err" v-if="errorMsg">{{errorMsg}}</span>

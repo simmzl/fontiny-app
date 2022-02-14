@@ -356,8 +356,8 @@ h6 {
   align-items: center;
 }
 .logo {
-  width: 62px;
-  height: 19px;
+  width: 86px;
+  height: 17px;
   margin-left: 16px;
 }
 .center {

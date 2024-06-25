@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Code by simmzl
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 
 const fonts = ref("");
 let errorMsg = ref("");
@@ -9,6 +9,8 @@ const file = reactive({
   size: 0,
   path: "",
 });
+const isDragging = ref(false);
+const dragger = ref<HTMLAreaElement | null>(null);
 
 const isValid = computed(() => !!fonts.value && !errorMsg.value && file.path);
 
@@ -38,315 +40,146 @@ const output = () => {
 };
 
 const upload = () => {
+  console.warn("upload", file);
   window.fontTiny.upload(file.path, file.name);
 };
+
+const onDrag = () => {
+  let counter = 0;
+
+  if (!dragger.value) return;
+  dragger.value.addEventListener("dragenter", () => {
+    counter++;
+    if (counter === 1) {
+      console.log('dragenter');
+      if (!isDragging.value) isDragging.value = true;
+    }
+  });
+  dragger.value.addEventListener("dragleave", () => {
+    counter--;
+    if (counter === 0) {
+      console.log('dragleave');
+      if (isDragging.value) isDragging.value = false;
+    }
+  });
+
+  //添加拖拽事件监听器
+  dragger.value.addEventListener("drop", (e) => {
+    counter = 0;
+    console.log('drop:', e);
+    if (isDragging.value) isDragging.value = false;
+    e.preventDefault();
+    //获取文件列表
+    const files = e.dataTransfer?.files;
+    console.log('files:', files, e);
+
+    if (files && files.length > 0) {
+      //获取文件路径
+      // @ts-ignore
+      const path = files[0].path;
+      console.log('path:', path, files[0].name);
+      if (!/\.ttf$/.test(files[0].name.toLowerCase())) return (errorMsg.value = "*请上传TTF格式文件");
+      file.name = files[0].name;
+      file.path = path;
+      file.size = files[0].size;
+      upload();
+    }
+  })
+
+  //阻止拖拽结束事件默认行为
+  dragger.value.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  })
+}
+
+onMounted(() => {
+  onDrag()
+});
 </script>
 
 <template>
   <!-- Code by yy & simmzl -->
-  <div class="top">
-    <img src="./assets/logo.png" class="logo" />
-  </div>
-
-  <div class="content">
-    <div class="input">
-      <div class="upload">
-        <label for="file" class="center bt1 btn">上传字体包</label>
-        <input type="file" id="file" @change="fileHandler" accept=".ttf" />
-      </div>
-      <div class="fontname">
-        <span class="text1 err" v-if="errorMsg">{{errorMsg}}</span>
-        <span class="text1" v-else-if="!file.path">*仅支持ttf格式</span>
-        <template v-else>
-          <span class="text2">{{ file.name || "--" }}</span>
-          <span class="text3">{{ fileSize }}</span>
-        </template>
-      </div>
+  <div class="wrapper" ref="dragger" id="dragger">
+    <div class="top">
+      <img src="./assets/logo.png" class="logo" />
     </div>
-    <textarea placeholder="请在此粘贴所需字符" class="text5 word" v-model="fonts"></textarea>
-    <div class="center bt2 btn" :class="{ disabled: !isValid }" @click="output">导出</div>
+
+    <div class="content">
+      <div class="input">
+        <div class="upload">
+          <label for="file" class="center bt1 btn">上传字体包</label>
+          <input type="file" id="file" @change="fileHandler" accept=".ttf" />
+        </div>
+        <div class="fontname">
+          <span class="text1 err" v-if="errorMsg">{{ errorMsg }}</span>
+          <span class="text1" v-else-if="!file.path">*仅支持ttf格式</span>
+          <template v-else>
+            <span class="text2">{{ file.name || "--" }}</span>
+            <span class="text3">{{ fileSize }}</span>
+          </template>
+        </div>
+      </div>
+      <textarea placeholder="请在此粘贴所需字符" class="text5 word" v-model="fonts"></textarea>
+      <div class="center bt2 btn" :class="{ disabled: !isValid }" @click="output">导出</div>
+    </div>
+  </div>
+  <div class="drag-area" v-show="isDragging">
+    <div class="drag-area-content">
+      <h2>拖拽到该区域即可上传</h2>
+      <span>*仅支持ttf格式</span>
+    </div>
   </div>
 </template>
 
+<style src="./assets/reset.css"></style>
+
 <style>
-html {
+.wrapper {
+  width: 100%;
   height: 100%;
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
 }
 
-body {
+.drag-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 4px;
+  width: 100%;
   height: 100%;
-  margin: 0;
-  font-size: 14px;
-  font-family: "PingFang SC", "Helvetica Neue", Helvetica, STHeiTi, Arial,
-    sans-serif;
-  user-select: none;
-  -webkit-touch-callout: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 3;
+  pointer-events: none;
+  background: rgba(39, 212, 209, 0.2);
 }
 
-article,
-aside,
-details,
-figcaption,
-figure,
-footer,
-header,
-hgroup,
-main,
-menu,
-nav,
-section,
-summary {
-  display: block;
+.drag-area-content {
+  border-style: dashed;
+  border-color: #27d4d1;
+  height: 100%;
+  width: 100%;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: none;
 }
 
-audio:not([controls]) {
-  display: none;
-  height: 0;
-}
-
-progress {
-  vertical-align: baseline;
-}
-
-template,
-[hidden] {
-  display: none;
-}
-
-a {
-  text-decoration: none;
-  background-color: transparent;
-  -webkit-text-decoration-skip: objects;
-}
-
-a:active,
-a:hover {
-  outline-width: 0;
-}
-
-abbr[title] {
-  text-decoration: underline;
-}
-
-b,
-strong {
-  font-weight: bolder;
-}
-
-dfn {
-  font-style: italic;
-}
-
-small {
-  font-size: 80%;
-}
-
-sub,
-sup {
-  position: relative;
-  font-size: 75%;
-  line-height: 0;
-  vertical-align: baseline;
-}
-
-sup {
-  top: -0.5em;
-}
-
-sub {
-  bottom: -0.25em;
-}
-
-img {
-  border-style: none;
-}
-
-svg:not(:root) {
-  overflow: hidden;
-}
-
-code,
-kbd,
-pre,
-samp {
-  font-size: 1em;
-  font-family: monospace;
-}
-
-pre {
-  overflow: auto;
-  white-space: pre;
-  word-wrap: break-word;
-}
-
-button,
-input,
-optgroup,
-select,
-textarea {
-  margin: 0;
-  outline: none;
-  font: inherit;
-  vertical-align: middle;
-  color: inherit;
-}
-
-button {
-  padding: 0;
-  border: none;
-  box-shadow: none;
-}
-
-button,
-input {
-  overflow: visible;
-}
-
-button,
-select {
-  text-transform: none;
-}
-
-button,
-html [type="button"],
-[type="reset"],
-[type="submit"] {
-  -webkit-appearance: button;
-}
-
-[disabled] {
-  cursor: default;
-}
-
-[type="checkbox"],
-[type="radio"] {
-  box-sizing: border-box;
-  padding: 0;
-}
-
-[type="number"]::-webkit-inner-spin-button,
-[type="number"]::-webkit-outer-spin-button {
-  height: auto;
-}
-
-[type="search"] {
-  -webkit-appearance: textfield;
-  outline-offset: -2px;
-}
-
-[type="search"]::-webkit-search-cancel-button,
-[type="search"]::-webkit-search-decoration {
-  -webkit-appearance: none;
-}
-
-::-webkit-file-upload-button {
-  -webkit-appearance: button;
-  font: inherit;
-}
-
-textarea {
-  overflow: auto;
-  resize: none;
-  vertical-align: top;
-}
-
-optgroup {
+.drag-area-content h2 {
+  color: #282828;
+  font-size: 24px;
   font-weight: bold;
+  margin-bottom: 16px;
 }
 
-input,
-select,
-textarea {
-  outline: 0;
+.drag-area-content span {
+  color: #555555;
+  font-size: 16px;
 }
 
-textarea,
-input {
-  -webkit-user-modify: read-write-plaintext-only;
-}
-
-input,
-select {
-  padding: 0;
-  border: 0 none;
-  -webkit-appearance: none;
-  background-color: transparent;
-}
-
-input::-ms-clear,
-input::-ms-reveal {
-  display: none;
-}
-
-input::-webkit-input-placeholder,
-textarea::-webkit-input-placeholder {
-  color: inherit;
-  opacity: 0.54;
-}
-
-input:-ms-input-placeholder,
-textarea:-ms-input-placeholder {
-  color: inherit;
-  opacity: 0.54;
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-
-td,
-th {
-  padding: 0;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-figure,
-form,
-blockquote {
-  margin: 0;
-}
-
-ul,
-ol,
-li,
-dl,
-dd {
-  padding: 0;
-  margin: 0;
-}
-
-ul,
-ol {
-  list-style: none outside none;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: normal;
-  font-size: 100%;
-  line-height: 1.5;
-}
-
-* {
-  box-sizing: border-box;
-}
-</style>
-
-<style>
 /* Code by yy */
 .top {
   width: 100%;
@@ -355,36 +188,43 @@ h6 {
   display: flex;
   align-items: center;
 }
+
 .logo {
   width: 86px;
   height: 17px;
   margin-left: 16px;
 }
+
 .center {
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .btn {
   cursor: pointer;
   background-color: #27d4d1;
   transition: all .3s;
 }
+
 .btn:active {
   background: #1ec6c3;
 }
+
 .content {
   width: 100%;
   height: 100%;
   background-color: white;
   align-items: center;
 }
+
 .upload {
   position: relative;
   width: 120px;
   height: 38px;
   margin: 0 auto;
 }
+
 .upload input {
   position: absolute;
   left: 0;
@@ -397,6 +237,7 @@ h6 {
   z-index: 1;
   cursor: pointer;
 }
+
 .upload .btn {
   position: absolute;
   left: 0;
@@ -408,6 +249,7 @@ h6 {
   z-index: 2;
   cursor: pointer;
 }
+
 .bt1 {
   width: 102px;
   height: 38px;
@@ -416,6 +258,7 @@ h6 {
   font-size: 14px;
   font-weight: bold;
 }
+
 .bt2 {
   width: 144px;
   height: 48px;
@@ -427,9 +270,11 @@ h6 {
   letter-spacing: 4px;
   padding-left: 4px;
 }
+
 .bt2.disabled {
   background-color: #d6d6d6;
 }
+
 .fontname {
   width: 256px;
   height: 38px;
@@ -444,14 +289,17 @@ h6 {
   align-items: center;
   justify-content: space-between;
 }
+
 .text1 {
   color: #c4c4c4;
   letter-spacing: 1px;
 }
+
 .err {
-  color: #ff904d;
+  color: #fe6063;
   letter-spacing: 0;
 }
+
 .text2 {
   color: #282828;
   flex: 1;
@@ -459,17 +307,20 @@ h6 {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .text3 {
   flex-shrink: 0;
   color: #b1b1b1;
   margin-left: 8px;
 }
+
 .input {
   width: 366px;
   height: 38px;
   margin: 56px auto 46px auto;
   display: flex;
 }
+
 .word {
   width: 366px;
   height: 50vh;
@@ -484,10 +335,12 @@ h6 {
   letter-spacing: 1px;
   display: block;
 }
+
 .text5 {
   color: #282828;
   text-align: justify;
 }
+
 .text5::placeholder {
   color: #b1b1b1;
 }

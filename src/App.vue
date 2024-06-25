@@ -24,9 +24,13 @@ const fileHandler = (e: Event) => {
   console.warn(input.files.length);
   const { name, path, size } = input.files[0] as any;
   errorMsg.value = "";
-  if (!/\.ttf$/.test(name.toLowerCase())) return (errorMsg.value = "*请上传TTF格式文件");
+  if (!/\.ttf$/.test(name.toLowerCase())) {
+    return (errorMsg.value = "*请上传TTF格式文件");
+  } else {
+    errorMsg.value = "";
+  }
 
-  console.warn(input.files);
+  console.warn(111, input.files);
   file.name = name;
   file.path = path;
   file.size = size;
@@ -79,6 +83,7 @@ const onDrag = () => {
       const path = files[0].path;
       console.log('path:', path, files[0].name);
       if (!/\.ttf$/.test(files[0].name.toLowerCase())) return (errorMsg.value = "*请上传TTF格式文件");
+      else errorMsg.value = "";
       file.name = files[0].name;
       file.path = path;
       file.size = files[0].size;
@@ -106,7 +111,7 @@ onMounted(() => {
     <div class="content">
       <div class="input">
         <div class="upload">
-          <label for="file" class="center bt1 btn">上传字体包</label>
+          <label for="file" class="center bt1 btn">拖拽上传字体包</label>
           <input type="file" id="file" @change="fileHandler" accept=".ttf" />
         </div>
         <div class="fontname">
@@ -134,9 +139,12 @@ onMounted(() => {
 
 <style>
 .wrapper {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   overflow: hidden;
+  font-size: 0;
   background-color: #fff;
 }
 
@@ -158,7 +166,7 @@ onMounted(() => {
 
 .drag-area-content {
   border-style: dashed;
-  border-color: #27d4d1;
+  border-color: #29d4d0;
   height: 100%;
   width: 100%;
   border-radius: 16px;
@@ -195,7 +203,7 @@ onMounted(() => {
   width: auto;
   height: 60%;
   margin-right: 8px;
-;pointer-events: none;
+  pointer-events: none;
 }
 
 .center {
@@ -214,10 +222,17 @@ onMounted(() => {
   background: #1ec6c3;
 }
 
+.btn:hover {
+  background: #1ec6c3;
+}
+
 .content {
   width: 100%;
   height: 100%;
-  align-items: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .upload {
@@ -263,11 +278,11 @@ onMounted(() => {
 
 .bt2 {
   width: 144px;
-  height: 48px;
-  margin: 46px auto 56px auto;
-  border-radius: 24px;
+  height: 38px;
+  margin: 46px auto 46px auto;
+  border-radius: 40px;
   color: white;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bold;
   letter-spacing: 4px;
   padding-left: 4px;
@@ -275,6 +290,7 @@ onMounted(() => {
 
 .bt2.disabled {
   background-color: #d6d6d6;
+  cursor: not-allowed;
 }
 
 .fontname {
@@ -341,6 +357,7 @@ onMounted(() => {
 .text5 {
   color: #282828;
   text-align: justify;
+  flex: 1;
 }
 
 .text5::placeholder {

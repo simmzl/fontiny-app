@@ -101,9 +101,8 @@ onMounted(() => {
   <!-- Code by yy & simmzl -->
   <div class="wrapper" ref="dragger" id="dragger">
     <div class="top">
-      <img src="./assets/logo.png" class="logo" />
+      <img src="./assets/logo2.png" class="logo" />
     </div>
-
     <div class="content">
       <div class="input">
         <div class="upload">
@@ -137,6 +136,8 @@ onMounted(() => {
 .wrapper {
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  background-color: #fff;
 }
 
 .drag-area {
@@ -183,16 +184,18 @@ onMounted(() => {
 /* Code by yy */
 .top {
   width: 100%;
-  height: 42px;
-  background-color: #222222;
+  height: 38px;
+  background-color: #27d4d1;
   display: flex;
   align-items: center;
+  justify-content: end;
 }
 
 .logo {
-  width: 86px;
-  height: 17px;
-  margin-left: 16px;
+  width: auto;
+  height: 60%;
+  margin-right: 8px;
+;pointer-events: none;
 }
 
 .center {
@@ -214,7 +217,6 @@ onMounted(() => {
 .content {
   width: 100%;
   height: 100%;
-  background-color: white;
   align-items: center;
 }
 

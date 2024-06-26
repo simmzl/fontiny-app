@@ -9,6 +9,13 @@ export default defineConfig({
     port: 3001
   },
   build: {
-    outDir: "../out/"
+    outDir: "../out/",
+    emptyOutDir: true
+  },
+  css: {
+    preprocessorOptions: {
+      sass: { charset: false },
+      scss: { charset: false },
+     },
   }
 })

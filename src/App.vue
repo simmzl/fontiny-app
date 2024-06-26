@@ -115,7 +115,7 @@ const onDrag = () => {
       // @ts-ignore
       const path = files[0].path;
       console.log('path:', path, files[0].name);
-      if (!/\.ttf$/.test(files[0].name.toLowerCase())) return (errorMsg.value = "*请上传TTF格式文件");
+      if (!/\.ttf$/.test(files[0].name.toLowerCase())) return (errorMsg.value = "*请上传ttf格式文件");
       else errorMsg.value = "";
       file.name = files[0].name;
       file.path = path;

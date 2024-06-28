@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from "vue";
-import { toggleTheme } from "./utils";
+import { toggleTheme, initTheme } from "./utils";
 
 const fonts = ref("");
 let errorMsg = ref("");
@@ -139,6 +139,7 @@ const onToggle = (e: MouseEvent) => {
 
 onMounted(() => {
   onDrag()
+  initTheme();
 });
 </script>
 
